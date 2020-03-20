@@ -23,7 +23,7 @@
 #define EXIT_DELAY    10      // DEBUG: Check if this is right for closing the server
 #define MSG_DELAY     1.5
 
-// Structures
+// Structuress
 //--> Message QUEUE
 typedef struct
 {
