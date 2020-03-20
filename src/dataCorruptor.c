@@ -19,6 +19,7 @@ int main(int argc, char* argv)
   {
     return 1;
   }
+
   MasterList* shList = NULL;
   if((shList = attachToSharedMemory(shmID)) == NULL)
   {
@@ -85,7 +86,13 @@ void corrupterProcessing(MasterList* shList)
     }
   }
 }
-
+// FUNCTION      : spinTheWheelOfDestruction
+// DESCRIPTION   : generates a random value between 0 and 20.
+//                 value used by DX to perform a random action
+//
+// PARAMETERS    : none
+//
+// RETURNS       : int -> value from the wheel
 int spinTheWheelOfDestruction(void)
 {
   //Get a value between 0-20
@@ -125,6 +132,32 @@ int killTheThing(MasterList* list, int index)
   return retCode;
 }
 
+// FUNCTION      : getElementAt
+// DESCRIPTION   : Gets the element at index
+//
+// PARAMETERS    :
+//	MasterList* list : Pointer to the shared memory master list
+//	int index : index of the element we are getting
+//
+// RETURNS       :
+//	Pointer to client node
+DCInfo* getElementAt(MasterList* list, int index)
+{
+	if(list->numberOfDCs == 0)
+	{
+		return NULL;
+	}
+
+	DCInfo* tracker = list->head;
+	for(int counter = 0; counter < index && tracker != NULL; counter++)
+	{
+		tracker = tracker->next;
+	}
+	return tracker;
+}
+
+
+
 // FUNCTION      : executeAction
 // DESCRIPTION   : Executes action based on the wheel of destruction number
 //                 passed in. Logging functions called within this function
@@ -151,6 +184,7 @@ int executeAction(MasterList* list, int action)
   {
     //delete message queue, get success to see if successful in deleting queue
     deletemessagequeu
+    msgctl (list->msgQueueID, IPC_RMID, (struct msqid_ds*)NULL);
     writeMsgQueueDeleteToLog(action, success);
     //return 1 to signal to close corrupter
     return 1;
