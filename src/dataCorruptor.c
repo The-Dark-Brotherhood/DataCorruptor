@@ -1,3 +1,4 @@
+#include "../inc/DataCorruptor.h"
 
 int main(int argc, char* argv)
 {
@@ -86,6 +87,7 @@ void corrupterProcessing(MasterList* shList)
     }
   }
 }
+
 // FUNCTION      : spinTheWheelOfDestruction
 // DESCRIPTION   : generates a random value between 0 and 20.
 //                 value used by DX to perform a random action

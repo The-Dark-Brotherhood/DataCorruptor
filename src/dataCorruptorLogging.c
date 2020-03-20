@@ -1,3 +1,6 @@
+#include "../inc/DataCorruptor.h"
+
+
 // FUNCTION      : writeDCKillToLog
 // DESCRIPTION   : writes to the log file - when deleting a data creator
 //
@@ -42,7 +45,7 @@ void writeMsgQueueDeleteToLog(int wodAction, int success)
     fprintf(fp, "[%s] : WOD Action %d - Delete the Message Queue\n",getTime(), wodAction);
     if(success)
     {
-    fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", getTime());
+      fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", getTime());
     }
     else
     {

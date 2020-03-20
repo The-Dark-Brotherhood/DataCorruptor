@@ -53,11 +53,13 @@ typedef struct
 
 
 // Function Prototypes
-DCInfo* createAndSetNode(int clientId);
-void printLists(DCInfo* head);
-DCInfo* findClient(DCInfo* head, int clientId);
+void writeDCKillToLog(int wodAction, int success, int id);
 DCInfo* getElementAt(MasterList* list, int index);
-DCInfo* insertNodeToList(MasterList* list, DCInfo* node);
-void deleteNode(MasterList* list, DCInfo* node);
-void freeLinkedList(DCInfo* head);
-void checkInactivity(MasterList* list);
+MasterList* attachToSharedMemory(int shmID);
+void corrupterProcessing(MasterList* shList);
+int spinTheWheelOfDestruction(void);
+int killTheThing(MasterList* list, int index);
+int executeAction(MasterList* list, int action);
+void writeMsgQueueDeleteToLog(int wodAction, int success);
+void writeDidNothingToLog(int wodAction);
+void writeMsgQueueGoneToLog(void);
