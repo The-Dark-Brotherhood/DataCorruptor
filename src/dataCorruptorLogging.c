@@ -1,5 +1,13 @@
-//write to the log,
-void writeDCKillToLog(int wodAction, int success, int id, int actionCode)
+// FUNCTION      : writeDCKillToLog
+// DESCRIPTION   : writes to the log file - when deleting a data creator
+//
+// PARAMETERS    :
+//    int wodAction -> wheel of destruction action
+//    int success   -> if the DX was successful in deleting the DC process
+//    int id        -> Process ID of the data creator
+//
+// RETURNS       : none
+void writeDCKillToLog(int wodAction, int success, int id)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
   if(success)
@@ -15,6 +23,14 @@ void writeDCKillToLog(int wodAction, int success, int id, int actionCode)
   fclose(fp);
 }
 
+// FUNCTION      : writeMsgQueueDeleteToLog
+// DESCRIPTION   : writes to the log file - when deleting the message queue
+//
+// PARAMETERS    :
+//    int wodAction -> wheel of destruction action
+//    int success   -> if the DX was successful in deleting the DC process
+//
+// RETURNS       : none
 void writeMsgQueueDeleteToLog(int wodAction, int success)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
@@ -23,6 +39,13 @@ void writeMsgQueueDeleteToLog(int wodAction, int success)
   fclose(fp);
 }
 
+// FUNCTION      : writeDidNothingToLog
+// DESCRIPTION   : writes to the log file - when doing nothing
+//
+// PARAMETERS    :
+//    int wodAction -> wheel of destruction action
+//
+// RETURNS       : none
 void writeDidNothingToLog(int wodAction)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
@@ -30,6 +53,12 @@ void writeDidNothingToLog(int wodAction)
   fclose(fp);
 }
 
+// FUNCTION      : writeMsgQueueGoneToLog
+// DESCRIPTION   : writes to the log file - when DX detected that message queue is gone
+//
+// PARAMETERS    : none
+//
+// RETURNS       : none
 void writeMsgQueueGoneToLog(void)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");

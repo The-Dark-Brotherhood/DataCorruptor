@@ -31,6 +31,16 @@ int main(int argc, char* argv)
   return 0;
 }
 
+// FUNCTION      : attachToSharedMemory
+// DESCRIPTION   : attach to the shared memory with the passed shared
+//                 memory ID
+//
+// PARAMETERS    :
+//    int shmID -> id of the shared memory
+//
+// RETURNS       :
+//    pointer to share memory master list
+//    NULL if not found
 MasterList* attachToSharedMemory(int shmID)
 {
   MasterList* shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
@@ -42,8 +52,20 @@ MasterList* attachToSharedMemory(int shmID)
   return shList;
 }
 
-
-int corrupterProcessing(MasterList* shList)
+// FUNCTION      : corrupterProcessing
+// DESCRIPTION   : Main processing loop of the Data Corrupter.
+//                 Performs 4 actions:
+//                   1 -> sleep 10-30 seconds
+//                   2 -> check for existance of message queue
+//                   3 -> select random action from WOD
+//                   4 -> Execute action
+//                Function exits once it detects the message queue is deleted;
+//
+// PARAMETERS    :
+//    MasterList* shList : Pointer to the shared memory master list
+//
+// RETURNS       : none
+void corrupterProcessing(MasterList* shList)
 {
   int running = 1;
   while(running)
@@ -103,7 +125,17 @@ int killTheThing(MasterList* list, int index)
   return retCode;
 }
 
-
+// FUNCTION      : executeAction
+// DESCRIPTION   : Executes action based on the wheel of destruction number
+//                 passed in. Logging functions called within this function
+//
+// PARAMETERS    :
+//    MasterList* list : Pointer to the shared memory master list
+//    int action        : WOD action to perform
+//
+// RETURNS       :
+//    Returns 1 if corruptor should quit - msg queue deleted
+//    Return 0 if corruptor should keep running
 int executeAction(MasterList* list, int action)
 {
   int actionCode = 0;
