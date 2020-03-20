@@ -184,7 +184,14 @@ int executeAction(MasterList* list, int action)
   {
     //delete message queue, get success to see if successful in deleting queue
     deletemessagequeu
-    msgctl (list->msgQueueID, IPC_RMID, (struct msqid_ds*)NULL);
+    if(msgctl (list->msgQueueID, IPC_RMID, (struct msqid_ds*)NULL) == -1)
+    {
+      success = -1;
+    }
+    else
+    {
+      success = 1;
+    }
     writeMsgQueueDeleteToLog(action, success);
     //return 1 to signal to close corrupter
     return 1;

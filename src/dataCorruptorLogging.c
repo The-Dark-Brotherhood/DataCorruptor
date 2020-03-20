@@ -10,17 +10,20 @@
 void writeDCKillToLog(int wodAction, int success, int id)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
-  if(success)
+  if(fp != NULL)
   {
-    fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] TERMINATED\n", getTime(), wodAction, id);
+    if(success)
+    {
+      fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] TERMINATED\n", getTime(), wodAction, id);
+    }
+    else
+    {
+      fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] FAILED - Data Creator with that PID does not exist\n", getTime(), wodAction, id);
+    }
+      //failed to kill, already dead, log
+    }
+    fclose(fp);
   }
-  else
-  {
-    fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] FAILED - Data Creator with that PID does not exist\n", getTime(), wodAction, id);
-  }
-    //failed to kill, already dead, log
-  }
-  fclose(fp);
 }
 
 // FUNCTION      : writeMsgQueueDeleteToLog
@@ -34,9 +37,21 @@ void writeDCKillToLog(int wodAction, int success, int id)
 void writeMsgQueueDeleteToLog(int wodAction, int success)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
-  fprintf(fp, "[%s] : WOD Action %d - Delete the Message Queue\n",getTime(), wodAction);
-  fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", getTime());
-  fclose(fp);
+  if(fp != NULL)
+  {
+    fprintf(fp, "[%s] : WOD Action %d - Delete the Message Queue\n",getTime(), wodAction);
+    if(success)
+    {
+    fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", getTime());
+    }
+    else
+    {
+      fprintf(fp, "[%s] : DX unable to delete the msgQ – assuming doesn't exist any more - exiting\n", getTime());
+    }
+    fclose(fp);
+  }
+
+
 }
 
 // FUNCTION      : writeDidNothingToLog
@@ -49,8 +64,11 @@ void writeMsgQueueDeleteToLog(int wodAction, int success)
 void writeDidNothingToLog(int wodAction)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
-  fprintf(fp, "[%s] : WOD Action %d - Did Nothing\n", getTime(), wodAction);
-  fclose(fp);
+  if(fp != NULL)
+  {
+    fprintf(fp, "[%s] : WOD Action %d - Did Nothing\n", getTime(), wodAction);
+    fclose(fp);
+  }
 }
 
 // FUNCTION      : writeMsgQueueGoneToLog
@@ -62,6 +80,9 @@ void writeDidNothingToLog(int wodAction)
 void writeMsgQueueGoneToLog(void)
 {
   FILE* fp = fopen (LOG_FILE_PATH, "a");
-  fprintf(fp, "[%s] : DX detected that msQ is gone - assuming DR/DCs done\n");
-  fclose(fp);
+  if(fp != NULL)
+  {
+    fprintf(fp, "[%s] : DX detected that msQ is gone - assuming DR/DCs done\n");
+    fclose(fp);
+  }
 }
