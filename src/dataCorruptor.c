@@ -3,7 +3,7 @@ int main(int argc, char* argv)
 {
   //to get the key
   key_t shmKey = ftok(“.”, 16535);
-
+  int shmID = 0;
   for(int i = 0; i < 100; i++)
   {
     // Grabs the shared memory ID
@@ -19,27 +19,49 @@ int main(int argc, char* argv)
   {
     return 1;
   }
-
-  MasterList* shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
-  if*(shList == NULL)
+  MasterList* shList = NULL;
+  if((shList = attachToSharedMemory(shmID)) == NULL)
   {
-    printf("Cannot attach to shared memory\n");
+    //unable to attach to shared memory
     return 2;
   }
+  corrupterProcessing(shList);
+
 
   return 0;
 }
 
-void corrupterProcessing(int shmKey)
+MasterList* attachToSharedMemory(int shmID)
 {
-  //Step 1: sleep for 10-30 seconds
-  srand(time(0));
-  sleep((rand() % 21)+10);
-  //Step 2: Check for existance of message queue
-  //Step 3: Select and action from WOD
-  int randomAction = spinTheWheelOfDestruction();
-  //Step 4: Execute Action
-  executeAction(randomAction);
+  MasterList* shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
+  if*(shList == NULL)
+  {
+    printf("Cannot attach to shared memory\n");
+  }
+
+  return shList;
+}
+
+
+int corrupterProcessing(MasterList* shList)
+{
+  int running = 1;
+  while(running)
+  {
+    //Step 1: sleep for 10-30 seconds
+    srand(time(0));
+    sleep((rand() % 21)+10);
+    //Step 2: Check for existance of message queue
+    //Step 3: Select and action from WOD
+    int randomAction = spinTheWheelOfDestruction();
+    //Step 4: Execute Action
+
+    //get a return value to know if should exit program
+    if(executeAction(shList, randomAction))
+    {
+      running = 0;
+    }
+  }
 }
 
 int spinTheWheelOfDestruction(void)
@@ -49,76 +71,118 @@ int spinTheWheelOfDestruction(void)
   return randomAction;
 }
 
-void executeAction(int action)
+// FUNCTION      : ¦fˆÌ0Ù”bHÊXèÉ1Ã$Æ!ãc†IŒ&+2L`ÈxÈÊXÌÉ1‰rLWfIŒFIŒ«(Æ“2–:2Œ`É1ˆÉXèÉ1ŠâdjÆòo
+// DESCRIPTION   : Kill the DC process indicated by the index
+//
+// PARAMETERS    :
+//    MasterList* list : Pointer to the shared memory master list
+//  int index        : Index of the client in the master list
+//
+// RETURNS       :
+//    Returns the client pid if the process was killed, -1 if the client does not exist in the list
+//    0 if the process was not killed (already was closed)
+int killTheThing(MasterList* list, int index)
 {
-  int actionCode = 0;
-  int dcID = 0;
-  switch(action)
+  int retCode = 0;
+  DCInfo* clientToKill = getElementAt(list, index);
+
+  if(clientToKill == NULL)  // Client does not exists
   {
-    case 0||8||19:
-    //do nothing
-      break;
-    case 1||4||11:
-    //kill 1st
-      break;
-    case 2||5||15:
-    //kill 3rd
-      break;
-    case 3||6||13:
-    //kill 2nd
-      break;
-    case 7:
-    //kill 4th
-      break;
-    case 9:
-    //kill 5th
-      break;
-    case 10||17:
-    //kill message queue
-      break;
-    case 12:
-    //kill 6
-      break;
-    case 14:
-    //kill 7
-      break;
-    case 16:
-    //kill 8
-      break;
-    case 18:
-    //kill 9
-      break;
-    case 20:
-    //kill 10
-      break;
-    default:
-    //error
+    retCode = -1;
   }
-  writeToLog(action, )
+  else if(kill(clientToKill->dcProcessID, SIGHUP) == 0) // Kills success
+  {
+    retCode = clientToKill->dcProcessID;
+    printf("success\n");
+  }
+  else // Client already dead
+  {
+    printf("already closed\n");
+  }
+
+  return retCode;
 }
 
-//write to the log,
-void writeToLog(int wodAction, int success, int id, int actionCode)
+
+int executeAction(MasterList* list, int action)
 {
-  char description[255] = "";
-  FILE * fp = fopen (LOG_FILE_PATH, "a");
-  switch(actionCode)
+  int actionCode = 0;
+  int dcNumber = 0;
+  int success = 0;
+  if(action == 0 || action == 8 || action == 19)
   {
-    case -2:
-      //detected queue no longer exists
-      fprintf(description, "[%s] : DX detected that msQ is gone - assuming DR/DCs done\n");
-      break;
-    case -1:
-      //deleted queue
-      fprintf(description, "[%s] : WOD Action %d - Delete the Message Queue\n",getTime(), wodAction);
-      break;
-    case 0:
-    / /did nothing
-      fprintf(description, "[%s] : WOD Action %d - Did Nothing\n", getTime(), wodAction);
-      break;
-    case 1..10:
-      fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] TERMINATED\n", getTime(), wodAction, id);
-      break;
+    //do Nothing
+    writeDidNothingToLog(action);
+
   }
-  fclose(fp);
+  else if(action == 10 || action == 17)
+  {
+    //delete message queue, get success to see if successful in deleting queue
+    deletemessagequeu
+    writeMsgQueueDeleteToLog(action, success);
+    //return 1 to signal to close corrupter
+    return 1;
+  }
+  else
+  {
+    switch(action)
+    {
+      case 1||4||11:
+      //kill 1st
+        dcNumber = 1;
+        break;
+      case 2||5||15:
+      //kill 3rd
+        dcNumber = 3;
+        break;
+      case 3||6||13:
+      //kill 2nd
+        dcNumber = 2;
+        break;
+      case 7:
+      //kill 4th
+        dcNumber = 4;
+        break;
+      case 9:
+      //kill 5th
+        dcNumber = 5;
+        break;
+      case 12:
+      //kill 6
+        dcNumber = 6;
+        break;
+      case 14:
+      //kill 7
+        dcNumber = 7;
+        break;
+      case 16:
+      //kill 8
+        dcNumber = 8;
+        break;
+      case 18:
+      //kill 9
+        dcNumber = 9;
+        break;
+      case 20:
+      //kill 10
+        dcNumber = 10;
+        break;
+    }
+    int retCode = killTheThing(list,dcNumber);
+    int successfulKill = 0;
+    if(retCode >= 0)
+    {
+      //failed to delete
+      successfulKill = 0;
+    }
+    else
+    {
+      //succeeded
+      successfulKill = 1;
+      //retCode holds pid
+    }
+    //pass wod action #, pid(in retcode), and successfulkill status, dcNumber
+    writeDCKillToLog(action, successfulKill, retCode, dcNumber);
+  }
+  return 0;
 }
