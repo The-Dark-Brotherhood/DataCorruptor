@@ -1,9 +1,10 @@
 #include "../inc/DataCorruptor.h"
 
+
 int main(int argc, char* argv)
 {
   //to get the key
-  key_t shmKey = ftok(“.”, 16535);
+  key_t shmKey = ftok(".", 16535);
   int shmID = 0;
   for(int i = 0; i < 100; i++)
   {
@@ -46,7 +47,7 @@ int main(int argc, char* argv)
 MasterList* attachToSharedMemory(int shmID)
 {
   MasterList* shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
-  if*(shList == NULL)
+  if(shList == NULL)
   {
     printf("Cannot attach to shared memory\n");
   }
@@ -185,7 +186,6 @@ int executeAction(MasterList* list, int action)
   else if(action == 10 || action == 17)
   {
     //delete message queue, get success to see if successful in deleting queue
-    deletemessagequeu
     if(msgctl (list->msgQueueID, IPC_RMID, (struct msqid_ds*)NULL) == -1)
     {
       success = -1;
@@ -202,15 +202,15 @@ int executeAction(MasterList* list, int action)
   {
     switch(action)
     {
-      case 1||4||11:
+      case 1: case 4: case 11:
       //kill 1st
         dcNumber = 1;
         break;
-      case 2||5||15:
+      case 2: case 5: case 15:
       //kill 3rd
         dcNumber = 3;
         break;
-      case 3||6||13:
+      case 3:case 6: case 13:
       //kill 2nd
         dcNumber = 2;
         break;

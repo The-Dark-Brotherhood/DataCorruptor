@@ -29,4 +29,3 @@ clean:
 	rm -f ./obj/*.o
 	rm -f ./inc/*.h~
 	rm -f ./src/*.c~
-

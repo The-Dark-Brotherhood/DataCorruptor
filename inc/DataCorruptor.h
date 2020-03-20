@@ -17,6 +17,7 @@
 #define ID_ERROR      -1
 #define SHM_KEYID     16535
 #define EXIT_CODE     6
+#define LOG_FILE_PATH "/tmp/dataCorruptor.log"
 
 // in seconds
 #define TIMEOUT       5       // DEBUG: CHANGE LATER
@@ -53,7 +54,7 @@ typedef struct
 
 
 // Function Prototypes
-void writeDCKillToLog(int wodAction, int success, int id);
+void writeDCKillToLog(int wodAction, int success, int id, int DCNum);
 DCInfo* getElementAt(MasterList* list, int index);
 MasterList* attachToSharedMemory(int shmID);
 void corrupterProcessing(MasterList* shList);
@@ -63,3 +64,4 @@ int executeAction(MasterList* list, int action);
 void writeMsgQueueDeleteToLog(int wodAction, int success);
 void writeDidNothingToLog(int wodAction);
 void writeMsgQueueGoneToLog(void);
+void getTime(char* output);

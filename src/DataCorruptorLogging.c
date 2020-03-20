@@ -1,6 +1,19 @@
 #include "../inc/DataCorruptor.h"
 
 
+void getTime(char* output)
+{
+  //Get time info in time_t struct
+  time_t rawtime;
+  struct tm *info;
+  time( &rawtime );
+  info = localtime(&rawtime);
+
+  //Set the time output to match the requirements
+  //first paramater is where to store outputted string
+  strftime(output, 49, "%F %T",info);
+}
+
 // FUNCTION      : writeDCKillToLog
 // DESCRIPTION   : writes to the log file - when deleting a data creator
 //
@@ -10,21 +23,23 @@
 //    int id        -> Process ID of the data creator
 //
 // RETURNS       : none
-void writeDCKillToLog(int wodAction, int success, int id)
+void writeDCKillToLog(int wodAction, int success, int id, int DCNum)
 {
+  char time[50] = "";
+  getTime(time);
+
   FILE* fp = fopen (LOG_FILE_PATH, "a");
   if(fp != NULL)
   {
     if(success)
     {
-      fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] TERMINATED\n", getTime(), wodAction, id);
+      fprintf(fp, "[%s] : WOD Action %d - DC-%02d [%d] TERMINATED\n", time, wodAction, DCNum, id);
     }
     else
     {
-      fprintf(description, "[%s] : WOD Action %d - DC-%02d [%d] FAILED - Data Creator with that PID does not exist\n", getTime(), wodAction, id);
+      fprintf(fp, "[%s] : WOD Action %d - DC-%02d [%d] FAILED - Data Creator with that PID does not exist\n", time, wodAction, DCNum, id);
     }
       //failed to kill, already dead, log
-    }
     fclose(fp);
   }
 }
@@ -39,17 +54,20 @@ void writeDCKillToLog(int wodAction, int success, int id)
 // RETURNS       : none
 void writeMsgQueueDeleteToLog(int wodAction, int success)
 {
+  char time[50] = "";
+  getTime(time);
+
   FILE* fp = fopen (LOG_FILE_PATH, "a");
   if(fp != NULL)
   {
-    fprintf(fp, "[%s] : WOD Action %d - Delete the Message Queue\n",getTime(), wodAction);
+    fprintf(fp, "[%s] : WOD Action %d - Delete the Message Queue\n", time, wodAction);
     if(success)
     {
-      fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", getTime());
+      fprintf(fp, "[%s] : DX deleted the msgQ – the DR/DCs can’t talk anymore - exiting\n", time);
     }
     else
     {
-      fprintf(fp, "[%s] : DX unable to delete the msgQ – assuming doesn't exist any more - exiting\n", getTime());
+      fprintf(fp, "[%s] : DX unable to delete the msgQ – assuming doesn't exist any more - exiting\n", time);
     }
     fclose(fp);
   }
@@ -66,10 +84,13 @@ void writeMsgQueueDeleteToLog(int wodAction, int success)
 // RETURNS       : none
 void writeDidNothingToLog(int wodAction)
 {
+  char time[50] = "";
+  getTime(time);
+
   FILE* fp = fopen (LOG_FILE_PATH, "a");
   if(fp != NULL)
   {
-    fprintf(fp, "[%s] : WOD Action %d - Did Nothing\n", getTime(), wodAction);
+    fprintf(fp, "[%s] : WOD Action %d - Did Nothing\n", time, wodAction);
     fclose(fp);
   }
 }
@@ -82,10 +103,13 @@ void writeDidNothingToLog(int wodAction)
 // RETURNS       : none
 void writeMsgQueueGoneToLog(void)
 {
+  char time[50] = "";
+  getTime(time);
+
   FILE* fp = fopen (LOG_FILE_PATH, "a");
   if(fp != NULL)
   {
-    fprintf(fp, "[%s] : DX detected that msQ is gone - assuming DR/DCs done\n");
+    fprintf(fp, "[%s] : DX detected that msQ is gone - assuming DR/DCs done\n", time);
     fclose(fp);
   }
 }
