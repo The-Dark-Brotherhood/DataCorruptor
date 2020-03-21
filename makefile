@@ -7,7 +7,7 @@
 #
 # FINAL BINARY Target
 ../dataReader/bin/DataCorruptor :	./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o
-	cc ./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o -o	../dataReader/bin/DataCreator
+	cc ./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o -o	../dataReader/bin/DataCorruptor
 #
 # =======================================================
 #                     Dependencies

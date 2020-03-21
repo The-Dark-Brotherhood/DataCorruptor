@@ -57,7 +57,7 @@ typedef struct
 void writeDCKillToLog(int wodAction, int success, int id, int DCNum);
 DCInfo* getElementAt(MasterList* list, int index);
 MasterList* attachToSharedMemory(int shmID);
-void corrupterProcessing(MasterList* shList);
+void corrupterProcessing(MasterList* shList,key_t shmKey);
 int spinTheWheelOfDestruction(void);
 int killTheThing(MasterList* list, int index);
 int executeAction(MasterList* list, int action);
