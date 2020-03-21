@@ -9,11 +9,14 @@ int main(int argc, char* argv)
   for(int i = 0; i < 100; i++)
   {
     // Grabs the shared memory ID
-    if(shmID = shmget(shmKey, sizeof(MasterList), 0) != -1)
+    shmID = shmget(shmKey, sizeof(MasterList), 0);
+    if(shmID != -1)
     {
       break;
+
     }
-    sleep(10);
+    printf("failed to get shm ID\n");
+    sleep(2);
   }
 
   // Share mem not found after number tries
@@ -28,7 +31,8 @@ int main(int argc, char* argv)
     //unable to attach to shared memory
     return 2;
   }
-  corrupterProcessing(shList);
+  printf("Attached to shared memory\n");
+  corrupterProcessing(shList, shmKey);
 
 
   return 0;
@@ -46,7 +50,8 @@ int main(int argc, char* argv)
 //    NULL if not found
 MasterList* attachToSharedMemory(int shmID)
 {
-  MasterList* shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
+  MasterList* shList = NULL;
+  shList = (MasterList*)shmat (shmID, NULL, 0); // Grabs the shared memory
   if(shList == NULL)
   {
     printf("Cannot attach to shared memory\n");
@@ -68,19 +73,37 @@ MasterList* attachToSharedMemory(int shmID)
 //    MasterList* shList : Pointer to the shared memory master list
 //
 // RETURNS       : none
-void corrupterProcessing(MasterList* shList)
+void corrupterProcessing(MasterList* shList, key_t shmKey)
 {
   int running = 1;
   while(running)
   {
     //Step 1: sleep for 10-30 seconds
     srand(time(0));
-    sleep((rand() % 21)+10);
+    sleep((rand() % 1)+10);
     //Step 2: Check for existance of message queue
+    int shmID = -1;
+    shmID = shmget(shmKey, sizeof(MasterList), 0);
+    if(shmID < 0)
+    {
+
+      writeMsgQueueGoneToLog();
+      break;
+    }
+    /*key_t msgKey = ftok(KEY_PATH, 'G');
+    int msgid = 0;
+    if (-1 == (msgid = msgget(msgKey, IPC_EXCL | IPC_CREAT | 0666)))
+    {
+       if (EEXIST == errno)
+       {
+          fprintf(stderr, "The queue exists.\n");
+       }
+     }*/
     //Step 3: Select and action from WOD
     int randomAction = spinTheWheelOfDestruction();
     //Step 4: Execute Action
-
+    randomAction = 3; //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+    printf("Action : %d\n", randomAction);
     //get a return value to know if should exit program
     if(executeAction(shList, randomAction))
     {
@@ -115,22 +138,27 @@ int spinTheWheelOfDestruction(void)
 //    0 if the process was not killed (already was closed)
 int killTheThing(MasterList* list, int index)
 {
+  printf("KiLl the thing\n");
   int retCode = 0;
   DCInfo* clientToKill = getElementAt(list, index);
 
   if(clientToKill == NULL)  // Client does not exists
   {
+    printf("client to kill is null\n");
     retCode = -1;
+    return retCode;
   }
-  else if(kill(clientToKill->dcProcessID, SIGHUP) == 0) // Kills success
-  {
-    retCode = clientToKill->dcProcessID;
-    printf("success\n");
-  }
-  else // Client already dead
-  {
-    printf("already closed\n");
-  }
+    printf("Trying to kill %d", clientToKill->dcProcessID);
+    retCode = kill(clientToKill->dcProcessID, SIGHUP);
+    if(retCode == 0)
+    {
+      retCode = clientToKill->dcProcessID;
+      printf("success\n");
+    }
+    else // Client already dead
+    {
+      printf("already closed\n");
+    }
 
   return retCode;
 }
@@ -146,16 +174,30 @@ int killTheThing(MasterList* list, int index)
 //	Pointer to client node
 DCInfo* getElementAt(MasterList* list, int index)
 {
-	if(list->numberOfDCs == 0)
+  printf("Index:%d\n", index);
+  printf("Number of Clients: %d\n", list->numberOfDCs);
+	if(list->numberOfDCs <= index)
 	{
 		return NULL;
 	}
+  printf("list-head: %p\n",(void*)list->head);
+  printf("list-tail: %p\n",(void*)list->tail);
 
-	DCInfo* tracker = list->head;
+
+
+	DCInfo* tracker = (void*)list->head;
+  printf("tracker assigned\n");
+    printf("id: %d\n",tracker->dcProcessID);
+  printf("tracker: %p", (void*)tracker);
+
 	for(int counter = 0; counter < index && tracker != NULL; counter++)
 	{
+    printf("tracker: %p\n",(void*)tracker->next);
+
+    printf("%d\n", counter);
 		tracker = tracker->next;
 	}
+  printf("Returned from getelement\n");
 	return tracker;
 }
 
@@ -179,12 +221,14 @@ int executeAction(MasterList* list, int action)
   int success = 0;
   if(action == 0 || action == 8 || action == 19)
   {
+    printf("Do nothing\n");
     //do Nothing
     writeDidNothingToLog(action);
 
   }
   else if(action == 10 || action == 17)
   {
+    printf("Delete message queue");
     //delete message queue, get success to see if successful in deleting queue
     if(msgctl (list->msgQueueID, IPC_RMID, (struct msqid_ds*)NULL) == -1)
     {
@@ -243,7 +287,7 @@ int executeAction(MasterList* list, int action)
         dcNumber = 10;
         break;
     }
-    int retCode = killTheThing(list,dcNumber);
+    int retCode = killTheThing(list,dcNumber -1);//make zero-based index
     int successfulKill = 0;
     if(retCode >= 0)
     {
