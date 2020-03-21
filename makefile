@@ -6,8 +6,8 @@
 # DESCRIPTION : This makefile is from the MyApp Example provided in the SET Program
 #
 # FINAL BINARY Target
-../dataReader/bin/DataCorruptor :	./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o
-	cc ./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o -o	../dataReader/bin/DataCorruptor
+../DataReader/bin/DataCorruptor :	./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o
+	cc ./obj/DataCorruptor.o	./obj/DataCorruptorLogging.o -o	../DataReader/bin/DataCorruptor
 #
 # =======================================================
 #                     Dependencies

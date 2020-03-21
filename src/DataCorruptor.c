@@ -102,8 +102,8 @@ void corrupterProcessing(MasterList* shList, key_t shmKey)
     //Step 3: Select and action from WOD
     int randomAction = spinTheWheelOfDestruction();
     //Step 4: Execute Action
-    randomAction = 3; //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
     printf("Action : %d\n", randomAction);
+
     //get a return value to know if should exit program
     if(executeAction(shList, randomAction))
     {
@@ -138,21 +138,22 @@ int spinTheWheelOfDestruction(void)
 //    0 if the process was not killed (already was closed)
 int killTheThing(MasterList* list, int index)
 {
-  printf("KiLl the thing\n");
-  int retCode = 0;
-  DCInfo* clientToKill = getElementAt(list, index);
 
-  if(clientToKill == NULL)  // Client does not exists
+  printf("Kill the thing\n");
+  int retCode = 0;
+  if(index > (list->numberOfDCs) - 1)
   {
-    printf("client to kill is null\n");
+    printf("index doesn't exist\n");
     retCode = -1;
     return retCode;
+    //client doesn't exist
   }
-    printf("Trying to kill %d", clientToKill->dcProcessID);
-    retCode = kill(clientToKill->dcProcessID, SIGHUP);
+  int pidToKill = list->dc[index].dcProcessID;
+    printf("Trying to kill %d", pidToKill);
+    retCode = kill(pidToKill, SIGHUP);
     if(retCode == 0)
     {
-      retCode = clientToKill->dcProcessID;
+      retCode =pidToKill;
       printf("success\n");
     }
     else // Client already dead
@@ -161,44 +162,6 @@ int killTheThing(MasterList* list, int index)
     }
 
   return retCode;
-}
-
-// FUNCTION      : getElementAt
-// DESCRIPTION   : Gets the element at index
-//
-// PARAMETERS    :
-//	MasterList* list : Pointer to the shared memory master list
-//	int index : index of the element we are getting
-//
-// RETURNS       :
-//	Pointer to client node
-DCInfo* getElementAt(MasterList* list, int index)
-{
-  printf("Index:%d\n", index);
-  printf("Number of Clients: %d\n", list->numberOfDCs);
-	if(list->numberOfDCs <= index)
-	{
-		return NULL;
-	}
-  printf("list-head: %p\n",(void*)list->head);
-  printf("list-tail: %p\n",(void*)list->tail);
-
-
-
-	DCInfo* tracker = (void*)list->head;
-  printf("tracker assigned\n");
-    printf("id: %d\n",tracker->dcProcessID);
-  printf("tracker: %p", (void*)tracker);
-
-	for(int counter = 0; counter < index && tracker != NULL; counter++)
-	{
-    printf("tracker: %p\n",(void*)tracker->next);
-
-    printf("%d\n", counter);
-		tracker = tracker->next;
-	}
-  printf("Returned from getelement\n");
-	return tracker;
 }
 
 
@@ -289,7 +252,7 @@ int executeAction(MasterList* list, int action)
     }
     int retCode = killTheThing(list,dcNumber -1);//make zero-based index
     int successfulKill = 0;
-    if(retCode >= 0)
+    if(retCode <= 0)
     {
       //failed to delete
       successfulKill = 0;

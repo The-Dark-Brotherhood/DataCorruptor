@@ -35,27 +35,24 @@ typedef struct
 
 //--> Shared Memory
 #define MAX_DC_ROLES  10
+//--> Shared Memory
+
 typedef struct DCInfo
 {
   pid_t dcProcessID;
   time_t lastTimeHeardFrom;
-
-  struct DCInfo* next;
-  struct DCInfo* prev;
 } DCInfo;
 
 typedef struct
 {
   int msgQueueID;
   int numberOfDCs;
-  DCInfo* head;
-  DCInfo* tail;
+  DCInfo dc[MAX_DC_ROLES];
 } MasterList;
 
 
 // Function Prototypes
 void writeDCKillToLog(int wodAction, int success, int id, int DCNum);
-DCInfo* getElementAt(MasterList* list, int index);
 MasterList* attachToSharedMemory(int shmID);
 void corrupterProcessing(MasterList* shList,key_t shmKey);
 int spinTheWheelOfDestruction(void);

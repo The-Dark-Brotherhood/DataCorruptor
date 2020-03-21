@@ -37,7 +37,7 @@ void writeDCKillToLog(int wodAction, int success, int id, int DCNum)
     }
     else
     {
-      fprintf(fp, "[%s] : WOD Action %d - DC-%02d [%d] FAILED - Data Creator with that PID does not exist\n", time, wodAction, DCNum, id);
+      fprintf(fp, "[%s] : WOD Action %d - DC-%02d FAILED - That Data Creator Doesn't Exist\n", time, wodAction, DCNum);
     }
       //failed to kill, already dead, log
     fclose(fp);
